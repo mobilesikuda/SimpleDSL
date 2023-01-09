@@ -9,7 +9,7 @@ plugins {
 }
 
 group = "ru.sikuda"
-version = "1.0.0"
+val fileVersion = "projectVersion.txt"
 
 repositories {
     mavenCentral()
@@ -43,18 +43,7 @@ tasks.withType<KotlinCompile> {
 
 application {
     mainClass.set("MainKt")
-}
-
-tasks.register("Hello world") {
-    doLast {
-        println("Hello world")
-    }
-}
-
-tasks.register("IncreaseVersion") {
-    println("Old version=$version")
-    version = "1.0.1"
-    println("New version=$version")
+    version = File(fileVersion).readText().split("=").get(1).trim()
 }
 
 tasks.register("meta-log") {
@@ -68,10 +57,6 @@ tasks.register("meta-log") {
     println("Time run: ${now()}")
 
 }.get()
-
-tasks.named("build") {
-    finalizedBy("meta-log")
-}
 
 tasks {
     this.named("jar")
@@ -98,10 +83,20 @@ tasks {
     build {
         dependsOn("fatJar")
     }
+
 }
 
+tasks.register("IncreaseVersion") {
 
-// Include dependent libraries in archive.
-val mainClassName = "com.company.application.Main"
+    val oldVersion = File(fileVersion).readText().split("=").get(1).trim()
+    println("Old version=$oldVersion")
+    val list = oldVersion.split(".")
+    val rev = list[2].toInt() + 1
+    val newVersion = "${list[0]}.${list[1]}.$rev"
+    println("New version=$newVersion")
+    File(fileVersion).writeText("version=$newVersion")
+
+}
+
 
 
